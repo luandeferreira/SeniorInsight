@@ -1,2 +1,5 @@
 Manifest-Version: 1.0
+Main-Class: br.com.seniorinsight.presentation.MainKt
+Implementation-Title: SeniorInsight
+Implementation-Version: 1.0-SNAPSHOT
 
