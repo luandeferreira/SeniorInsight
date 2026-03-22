@@ -100,3 +100,8 @@ tasks.register("deploy") {
         println("=".repeat(50) + "\n")
     }
 }
+
+// Tarefa obrigatória para o Heroku conseguir compilar e fazer o deploy
+tasks.register("stage") {
+    dependsOn("clean", "build")
+}
