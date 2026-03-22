@@ -33,5 +33,4 @@ jobs:
           post-pr-comment: true
           use-annotations: true
           upload-result: true
-          # quick-fixes available em planos Ultimate
           push-fixes: 'none'
