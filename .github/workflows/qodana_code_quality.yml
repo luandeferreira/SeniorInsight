@@ -1,37 +1,10 @@
-name: 🔍 Qodana - Code Quality Analysis
+# Este ficheiro deve ficar na RAIZ do seu projeto (junto ao build.gradle.kts)
+# Ele diz ao motor do Qodana qual é a linguagem do nosso projeto.
+version: "1.0"
 
-on:
-  workflow_dispatch:
-  pull_request:
-    branches: [ "main", "develop" ]
-  push:
-    branches: [ "main", "develop" ]
+# Linter gratuito para projetos Kotlin/Java
+linter: jetbrains/qodana-jvm-community:latest
 
-jobs:
-  qodana:
-    name: 📊 Analisar Qualidade do Código
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write
-      pull-requests: write
-      checks: write
-
-    steps:
-      - name: 📥 Clonar Repositório
-        uses: actions/checkout@v4
-        with:
-          ref: ${{ github.event.pull_request.head.sha }}
-          fetch-depth: 0
-
-      - name: 🔍 Executar Análise Qodana
-        uses: JetBrains/qodana-action@v2025.3
-        env:
-          QODANA_TOKEN: ${{ secrets.QODANA_TOKEN }}
-        with:
-          pr-mode: true
-          use-caches: true
-          post-pr-comment: true
-          use-annotations: true
-          upload-result: true
-          # quick-fixes available em planos Ultimate
-          push-fixes: 'none'
+# Exclui a pasta de testes para ele focar apenas na qualidade do código de produção
+exclude:
+  - name: "src/test"
