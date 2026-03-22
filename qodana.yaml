@@ -1,9 +1,10 @@
-# Este ficheiro tem de ficar na RAIZ do seu projeto (junto ao build.gradle.kts)
+####################################################################################################################
+# WARNING: Do not store sensitive information in this file, as its contents will be included in the Qodana report. #
+####################################################################################################################
+
 version: "1.0"
-
-# Linter gratuito para projetos Kotlin/Java
-linter: jetbrains/qodana-jvm-community:latest
-
-# Exclui a pasta de testes para ele focar apenas na qualidade do código de produção
-exclude:
-  - name: "src/test"
+linter: jetbrains/qodana-jvm:2025.3
+profile:
+  name: qodana.recommended
+include:
+  - name: CheckDependencyLicenses

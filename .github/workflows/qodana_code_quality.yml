@@ -1,36 +1,28 @@
-name: 🔍 Qodana - Code Quality Analysis
-
+name: Qodana
 on:
   workflow_dispatch:
   pull_request:
-    branches: [ "main", "develop" ]
   push:
-    branches: [ "main", "develop" ]
+    branches: # Specify your branches here
+      - main # The 'main' branch
+      - 'releases/*' # The release branches
 
 jobs:
   qodana:
-    name: 📊 Analisar Qualidade do Código
     runs-on: ubuntu-latest
     permissions:
       contents: write
       pull-requests: write
       checks: write
-
     steps:
-      - name: 📥 Clonar Repositório
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v3
         with:
-          ref: ${{ github.event.pull_request.head.sha }}
-          fetch-depth: 0
-
-      - name: 🔍 Executar Análise Qodana
+          ref: ${{ github.event.pull_request.head.sha }}  # to check out the actual pull request commit, not the merge commit
+          fetch-depth: 0  # a full history is required for pull request analysis
+      - name: 'Qodana Scan'
         uses: JetBrains/qodana-action@v2025.3
-        env:
-          QODANA_TOKEN: ${{ secrets.QODANA_TOKEN }}
         with:
-          pr-mode: true
-          use-caches: true
-          post-pr-comment: true
-          use-annotations: true
-          upload-result: true
-          push-fixes: 'none'
+          pr-mode: false
+        env:
+          QODANA_TOKEN: ${{ secrets.QODANA_TOKEN_688858611 }}
+          QODANA_ENDPOINT: 'https://qodana.cloud'
