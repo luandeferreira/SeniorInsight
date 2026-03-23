@@ -1,0 +1,68 @@
+name: 🚀 CI/CD Pipeline - SeniorInsight AI
+
+on:
+  push:
+    branches: [ "main", "develop", "dev*", "feature/*" ]
+  pull_request:
+    branches: [ "main", "develop" ]
+
+jobs:
+  # ==========================================
+  # TESTES (Roda em TODAS as branches)
+  # ==========================================
+  test:
+    name: 🧪 Rodar Testes e Qualidade
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 📥 Clonar o Repositório
+        uses: actions/checkout@v4
+
+      - name: ☕ Configurar Java (JDK 21)
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'corretto'
+          cache: gradle
+
+      - name: 🏗️ Setup Gradle com Cache
+        uses: gradle/actions/setup-gradle@v3
+
+      - name: ✅ Executar Testes e Build
+        run: ./gradlew clean build test --no-daemon
+
+      - name: 📊 Upload Relatório de Testes
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-reports
+          path: build/reports/tests/test/
+
+  # ==========================================
+  # DEPLOY (Apenas em main)
+  # ==========================================
+  deploy:
+    name: 🚀 Deploy
+    needs: test
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+
+    steps:
+      - name: 📥 Clonar o Repositório
+        uses: actions/checkout@v4
+
+      - name: ☕ Configurar Java (JDK 21)
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'corretto'
+          cache: gradle
+
+      - name: 🏗️ Build Fat JAR
+        run: ./gradlew fatJar --no-daemon
+
+      - name: 📦 Upload Artefato
+        uses: actions/upload-artifact@v4
+        with:
+          name: fat-jar
+          path: build/libs/SeniorInsight-*-fat.jar
