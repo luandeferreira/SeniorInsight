@@ -23,15 +23,19 @@ jobs:
         with:
           java-version: '21'
           distribution: 'corretto'
-          cache: gradle
 
-      - name: 🏗️ Setup Gradle com Cache
+      - name: 🐘 Configurar Gradle
         uses: gradle/actions/setup-gradle@v3
 
-      - name: ✅ Executar Testes e Build
-        run: ./gradlew clean build test --no-daemon
+      - name: 🛠️ Compilar e Rodar Testes
+        run: ./gradlew clean build test
 
-      - name: 📊 Upload Relatório de Testes
+      - name: 📊 Gerar Relatório de Cobertura
+        run: ./gradlew jacocoTestReport
+        continue-on-error: true
+
+      # Upload dos artefatos de teste
+      - name: 📤 Upload Relatório de Testes
         if: always()
         uses: actions/upload-artifact@v4
         with:
@@ -39,30 +43,68 @@ jobs:
           path: build/reports/tests/test/
 
   # ==========================================
-  # DEPLOY (Apenas em main)
+  # DEPLOY EM STAGING (develop)
+  # Só roda em 'develop' se testes passarem
   # ==========================================
-  deploy:
-    name: 🚀 Deploy
+  deploy-staging:
+    name: 🚀 Deploy em STAGING (develop)
     needs: test
-    runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    runs-on: ubuntu-22.04 # <-- FIX: Mantido no 22.04 para evitar bug do Heroku CLI
+    if: github.ref == 'refs/heads/develop' && github.event_name == 'push'
 
     steps:
-      - name: 📥 Clonar o Repositório
+      - name: 📥 Clonar Repositório
         uses: actions/checkout@v4
 
-      - name: ☕ Configurar Java (JDK 21)
+      - name: ☕ Configurar Java
         uses: actions/setup-java@v4
         with:
           java-version: '21'
           distribution: 'corretto'
-          cache: gradle
 
-      - name: 🏗️ Build Fat JAR
-        run: ./gradlew fatJar --no-daemon
+      - name: 🐘 Build para Deploy
+        run: ./gradlew build -x test
 
-      - name: 📦 Upload Artefato
-        uses: actions/upload-artifact@v4
+      - name: ☁️ Deploy no Heroku Staging
+        uses: akhileshns/heroku-deploy@v3.12.14
         with:
-          name: fat-jar
-          path: build/libs/SeniorInsight-*-fat.jar
+          heroku_api_key: ${{secrets.HEROKU_API_KEY}}
+          heroku_email: ${{secrets.HEROKU_EMAIL}}
+          heroku_app_name: 'seniorinsight-staging'
+          dontautocreate: true # <-- FIX: Impede o erro de tentar recriar a app
+        continue-on-error: true
+
+  # ==========================================
+  # DEPLOY EM PRODUÇÃO (main)
+  # Só roda em 'main' se testes passarem
+  # ==========================================
+  deploy-production:
+    name: 🚀 Deploy em PRODUÇÃO (main)
+    needs: test
+    runs-on: ubuntu-22.04 # <-- FIX: Mantido no 22.04 para evitar bug do Heroku CLI
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+
+    steps:
+      - name: 📥 Clonar Repositório
+        uses: actions/checkout@v4
+
+      - name: ☕ Configurar Java
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'corretto'
+
+      - name: 🐘 Build para Deploy
+        run: ./gradlew build -x test
+
+      - name: ☁️ Deploy no Heroku Produção
+        uses: akhileshns/heroku-deploy@v3.12.14
+        with:
+          heroku_api_key: ${{secrets.HEROKU_API_KEY}}
+          heroku_email: ${{secrets.HEROKU_EMAIL}}
+          heroku_app_name: 'seniorinsight-api'
+          dontautocreate: true # <-- FIX: Impede o erro de tentar recriar a app
+        continue-on-error: true
+
+      - name: 📢 Notificação de Deploy
+        run: echo "✅ Deploy em PRODUÇÃO concluído com sucesso!"

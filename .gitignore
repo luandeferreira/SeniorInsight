@@ -10,7 +10,7 @@
 # Mobile Tools for Java (J2ME)
 .mtj.tmp/
 
-# Package Files (JARs NÃO do gradle wrapper)
+# Package Files #
 *.jar
 *.war
 *.nar
@@ -23,21 +23,26 @@
 hs_err_pid*
 replay_pid*
 
-# Gradle Build Cache (IGNORE)
+# Kotlin Gradle plugin
+.kotlin/
+
+# Gradle
 .gradle/
-.gradletasknamecache
 build/
 
-# IDE
+# IDEs
 .idea/
 *.iml
 *.iws
 *.ipr
-out/
-
-# Kotlin
-.kotlin/
-
-# OS
+.vscode/
 .DS_Store
-Thumbs.db
+
+# OS files
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Exceções para Gradle Wrapper (necessário para CI/CD)
+!gradle/wrapper/gradle-wrapper.jar
